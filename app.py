@@ -8,30 +8,45 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# -------------------- GLOBAL CSS (sidebar + blank box + theme) --------------------
+# -------------------- CSS (UI + design) --------------------
 st.markdown(
     """
     <style>
-    /* Hide Streamlit sidebar and nav */
-    section[data-testid="stSidebar"] {display: none !important;}
-    div[data-testid="stSidebarNav"] {display: none !important;}
+    /* =========================
+       HIDE STREAMLIT CLOUD UI
+       ========================= */
+    /* Top-right toolbar (Share / icons) */
+    [data-testid="stToolbar"] {display: none !important;}
+    /* Bottom-right status / "Manage app" / deploy */
+    [data-testid="stStatusWidget"] {display: none !important;}
+    [data-testid="stAppDeployButton"] {display: none !important;}
+    /* Header container sometimes holds toolbar */
+    header {visibility: hidden !important;}
+    header {height: 0px !important;}
 
-    /* Also hide the small collapse arrow space */
+    /* =========================
+       HIDE SIDEBAR / NAV
+       ========================= */
+    section[data-testid="stSidebar"] {display:none !important;}
+    div[data-testid="stSidebarNav"] {display:none !important;}
     button[kind="headerNoPadding"] {display:none !important;}
 
-    /* Remove the blank rounded BaseWeb input box (the one you keep seeing) */
+    /* =========================
+       REMOVE ANY INPUT-LIKE BAR
+       ========================= */
     [data-baseweb="input"] {display:none !important;}
     [data-baseweb="textarea"] {display:none !important;}
     [data-testid="stTextInput"] {display:none !important;}
     [data-testid="stTextInputRootElement"] {display:none !important;}
     input[type="text"], input[type="search"], textarea {display:none !important;}
 
-    /* Attractive grey background */
+    /* =========================
+       BACKGROUND + LAYOUT
+       ========================= */
     .stApp {
         background: linear-gradient(180deg, #f3f4f6 0%, #eef2f7 60%, #f8fafc 100%) !important;
     }
 
-    /* Page spacing */
     .block-container {
         padding-top: 1.8rem;
         padding-bottom: 1.0rem;
@@ -125,9 +140,7 @@ def load_logo_no_crop(path: Path, target_px: int = 170):
     if not path.exists():
         return None
     img = Image.open(path).convert("RGBA")
-    # Add padding so it never looks clipped
     img = ImageOps.expand(img, border=18, fill=(255, 255, 255, 255))
-    # Fit without cropping
     img = ImageOps.contain(img, (target_px, target_px))
     return img
 
