@@ -1,7 +1,6 @@
 import streamlit as st
-from PIL import Image, ImageOps
 from pathlib import Path
-import uuid
+from PIL import Image, ImageOps
 
 st.set_page_config(
     page_title="NEA Master Protection Tool",
@@ -9,128 +8,162 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ---------- CSS (hide sidebar + style big colored buttons) ----------
+# ------------------ GLOBAL CSS ------------------
 st.markdown(
     """
     <style>
-    /* Hide Streamlit sidebar (left panel) */
+    /* Hide Streamlit sidebar */
     [data-testid="stSidebar"] {display:none !important;}
     [data-testid="stSidebarNav"] {display:none !important;}
 
-    /* Reduce top padding to avoid any accidental clipping space issues */
-    .block-container {padding-top: 0.6rem; padding-bottom: 0.6rem;}
+    /* Overall spacing */
+    .block-container {padding-top: 1.2rem; padding-bottom: 1rem; max-width: 1200px;}
 
-    /* Remove any HR lines */
+    /* Remove default hr if any */
     hr {display:none !important;}
 
-    /* Make subheader spacing tighter */
-    h3 {margin-top: 0.5rem !important;}
-
-    /* BIG button base */
-    div.stButton > button {
-        width: 100%;
-        height: 78px;                 /* bigger */
-        border-radius: 18px;
-        border: 1px solid rgba(0,0,0,0.10);
-        font-size: 20px;              /* bolder text */
-        font-weight: 900;             /* extra bold */
-        color: #ffffff;
-        letter-spacing: 0.2px;
-        box-shadow: 0 12px 26px rgba(2, 132, 199, 0.20);
-        transition: transform 120ms ease, box-shadow 120ms ease;
-        margin: 0 !important;
-    }
-    div.stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 34px rgba(2, 132, 199, 0.30);
-        filter: brightness(1.02);
+    /* Header spacing */
+    .nea-header-wrap{
+        margin-top: 10px;
+        margin-bottom: 14px;
     }
 
-    /* Target specific buttons by key (stable trick using aria-label contains) */
-    button[aria-label="⚡  TCC Plot Tool (Q1–Q5)"] { 
-        background: linear-gradient(135deg, #0b5bd3 0%, #0ea5e9 100%) !important;
-    }
-    button[aria-label="🧮  OC/EF Grid Tool"] { 
-        background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 55%, #60a5fa 100%) !important;
-    }
-    button[aria-label="📘  Theory"] { 
-        background: linear-gradient(135deg, #075985 0%, #0284c7 55%, #38bdf8 100%) !important;
-    }
-    button[aria-label="🛠️  Working"] { 
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 55%, #0b5bd3 100%) !important;
-    }
-
-    /* Card look */
-    .card{
+    /* Card container */
+    .nea-card{
         border: 1px solid rgba(0,0,0,0.08);
         border-radius: 18px;
-        padding: 18px 18px 10px 18px;
+        padding: 18px;
         background: #ffffff;
         box-shadow: 0 10px 30px rgba(0,0,0,0.06);
     }
+
+    /* Tool tiles grid */
+    .tiles{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 14px;
+    }
+
+    /* A tool tile */
+    .tile{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 92px;
+        border-radius: 18px;
+        color: white;
+        font-size: 20px;
+        font-weight: 900;
+        text-decoration: none !important;
+        box-shadow: 0 14px 30px rgba(2,132,199,0.20);
+        border: 1px solid rgba(255,255,255,0.18);
+        transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+        user-select: none;
+    }
+    .tile:hover{
+        transform: translateY(-2px);
+        box-shadow: 0 18px 40px rgba(2,132,199,0.30);
+        filter: brightness(1.03);
+    }
+
+    /* 4 blue shades */
+    .b1{ background: linear-gradient(135deg, #0b5bd3 0%, #0ea5e9 100%); }
+    .b2{ background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 55%, #60a5fa 100%); }
+    .b3{ background: linear-gradient(135deg, #075985 0%, #0284c7 55%, #38bdf8 100%); }
+    .b4{ background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 55%, #0b5bd3 100%); }
+
+    /* Emoji spacing */
+    .tile span{
+        display:inline-flex;
+        gap: 10px;
+        align-items:center;
+    }
+
+    /* Make it mobile-friendly */
+    @media (max-width: 900px){
+        .tiles{ grid-template-columns: 1fr; }
+        .tile{ height: 84px; font-size: 18px; }
+    }
     </style>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
-# ---------- Load logo safely (no cropping) ----------
+# ------------------ NAV HANDLER ------------------
+# We navigate using query param ?go=tcc / ocef / theory / working
+qp = st.query_params
+go = qp.get("go", None)
+
+if go == "tcc":
+    st.query_params.clear()
+    st.switch_page("pages/2_GUI_Final5_TCC.py")
+elif go == "ocef":
+    st.query_params.clear()
+    st.switch_page("pages/3_OC_EF_GOD.py")
+elif go == "theory":
+    st.query_params.clear()
+    st.switch_page("pages/4_Theory.py")
+elif go == "working":
+    st.query_params.clear()
+    st.switch_page("pages/5_Working.py")
+
+# ------------------ LOGO (IMPORTANT NOTE) ------------------
+# If your logo file itself is cropped, Streamlit cannot "fix" it.
+# Replace logo.jpg in GitHub with the FULL original logo image for perfect result.
 logo_path = Path(__file__).parent / "logo.jpg"
 
-def load_logo_safe(path: Path, target: int = 170) -> Image.Image | None:
-    """
-    Ensures the logo is fully visible by:
-    - loading safely
-    - fitting into a square canvas without cropping
-    - adding small padding so top never gets clipped visually
-    """
+def load_logo(path: Path, target_w: int = 150) -> Image.Image | None:
     if not path.exists():
         return None
-
     img = Image.open(path).convert("RGBA")
-    # Add small white border/padding to avoid perceived clipping
-    img = ImageOps.expand(img, border=8, fill=(255, 255, 255, 255))
-    # Fit into target x target without cropping
-    img = ImageOps.contain(img, (target, target))
+
+    # Add padding around logo so it never "touches" the edges visually
+    img = ImageOps.expand(img, border=10, fill=(255, 255, 255, 255))
+
+    # Keep full image visible (no cropping)
+    img = ImageOps.contain(img, (target_w, target_w))
+
     return img
 
-# ---------- Header ----------
-left, right = st.columns([1.0, 5.0], vertical_alignment="center")
+# ------------------ HEADER ------------------
+st.markdown("<div class='nea-header-wrap'>", unsafe_allow_html=True)
 
-with left:
-    logo = load_logo_safe(logo_path, target=170)  # smaller and fully visible
+c1, c2 = st.columns([1.1, 5.0], vertical_alignment="center")
+with c1:
+    logo = load_logo(logo_path, target_w=150)
     if logo is not None:
-        st.image(logo, width=170)  # fixed width prevents Streamlit weird scaling
+        st.image(logo, width=150)
+    else:
+        st.warning("logo.jpg not found in repo root")
 
-with right:
+with c2:
     st.markdown(
-        "<h1 style='margin-bottom:0.15rem;'>NEA Master Protection Tool</h1>",
-        unsafe_allow_html=True,
+        "<h1 style='margin:0; padding:0; font-size:46px; font-weight:900;'>NEA Master Protection Tool</h1>",
+        unsafe_allow_html=True
     )
     st.markdown(
-        "<div style='color:#4b5563;font-weight:700;margin-top:0.25rem;'>Select a tool below. (Navigation is here)</div>",
-        unsafe_allow_html=True,
+        "<div style='margin-top:6px; color:#4b5563; font-weight:700; font-size:16px;'>Select a tool below. (Navigation is here)</div>",
+        unsafe_allow_html=True
     )
 
-# ---------- Tools grid ----------
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("Open a tool")
+st.markdown("</div>", unsafe_allow_html=True)
 
-r1c1, r1c2 = st.columns(2, gap="large")
-with r1c1:
-    if st.button("⚡  TCC Plot Tool (Q1–Q5)", use_container_width=True, key="btn_tcc"):
-        st.switch_page("pages/2_GUI_Final5_TCC.py")
+# ------------------ MAIN CARD ------------------
+st.markdown("<div class='nea-card'>", unsafe_allow_html=True)
+st.markdown("<h3 style='margin:0; font-size:26px; font-weight:900;'>Open a tool</h3>", unsafe_allow_html=True)
 
-with r1c2:
-    if st.button("🧮  OC/EF Grid Tool", use_container_width=True, key="btn_ocef"):
-        st.switch_page("pages/3_OC_EF_GOD.py")
-
-r2c1, r2c2 = st.columns(2, gap="large")
-with r2c1:
-    if st.button("📘  Theory", use_container_width=True, key="btn_theory"):
-        st.switch_page("pages/4_Theory.py")
-
-with r2c2:
-    if st.button("🛠️  Working", use_container_width=True, key="btn_working"):
-        st.switch_page("pages/5_Working.py")
+# Clickable tiles (stable colors + stable layout)
+st.markdown(
+    """
+    <div class="tiles">
+        <a class="tile b1" href="?go=tcc"><span>⚡ TCC Plot Tool (Q1–Q5)</span></a>
+        <a class="tile b2" href="?go=ocef"><span>🧮 OC/EF Grid Tool</span></a>
+        <a class="tile b3" href="?go=theory"><span>📘 Theory</span></a>
+        <a class="tile b4" href="?go=working"><span>🛠️ Working</span></a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.markdown("</div>", unsafe_allow_html=True)
