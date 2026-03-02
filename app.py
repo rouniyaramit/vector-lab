@@ -12,7 +12,7 @@ with c1:
         st.image(Image.open(logo_path), use_container_width=True)
 with c2:
     st.title("NEA Master Protection Tool")
-    st.caption("Web version (Master Launcher → Tools as pages)")
+    st.caption("")
 
 st.divider()
 
@@ -32,3 +32,4 @@ with colB:
         st.switch_page("pages/5_Working.py")
 
 st.info("On the web, tools open as pages (instead of Tkinter pop-up windows).")
+
