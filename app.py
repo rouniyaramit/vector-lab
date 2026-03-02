@@ -31,13 +31,18 @@ st.markdown(
     /* Remove any horizontal rule lines */
     hr {display:none !important;}
 
-    /* ---- REMOVE THAT BLANK BOX ----
-       Sometimes a stray text_input/search component appears.
-       Hide empty text inputs and their containers.
+    /* ===============================
+       REMOVE THE BLANK INPUT BOX
+       ===============================
+       Streamlit inputs are BaseWeb components. Even if you hide <input>,
+       the wrapper can remain visible. So we hide BaseWeb input wrappers too.
     */
+    [data-baseweb="input"] {display:none !important;}
+    [data-baseweb="textarea"] {display:none !important;}
     [data-testid="stTextInput"] {display:none !important;}
     [data-testid="stTextInputRootElement"] {display:none !important;}
-    input[type="text"] {display:none !important;}
+    input[type="text"], input[type="search"], textarea {display:none !important;}
+    div[role="textbox"] {display:none !important;}
 
     /* Header wrapper */
     .nea-header {
@@ -70,7 +75,6 @@ st.markdown(
         height: 96px;
         border-radius: 18px;
 
-        /* FORCE WHITE text always */
         color: #ffffff !important;
         text-decoration: none !important;
         font-size: 22px;
@@ -83,7 +87,6 @@ st.markdown(
         user-select: none;
     }
 
-    /* Force white for visited/hover/active */
     .tile:visited { color:#ffffff !important; }
     .tile:hover   { color:#ffffff !important; text-decoration:none !important; }
     .tile:active  { color:#ffffff !important; }
@@ -130,10 +133,9 @@ elif go == "working":
 # -------------------- LOGO (NO CROP) --------------------
 logo_path = Path(__file__).parent / "logo.jpg"
 
-def load_logo_no_crop(path: Path, target_px: int = 170) -> Image.Image | None:
+def load_logo_no_crop(path: Path, target_px: int = 170):
     if not path.exists():
         return None
-
     img = Image.open(path).convert("RGBA")
     img = ImageOps.expand(img, border=18, fill=(255, 255, 255, 255))
     img = ImageOps.contain(img, (target_px, target_px))
