@@ -177,7 +177,7 @@ with c2:
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<div style='margin-top:8px; color:#4b5563; font-weight:800; font-size:16px;'>Select a tool below. (Navigation is here)</div>",
+        "<div style='margin-top:8px; color:#4b5563; font-weight:800; font-size:16px;'>",
         unsafe_allow_html=True,
     )
 
@@ -211,3 +211,4 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
