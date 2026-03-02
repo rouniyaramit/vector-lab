@@ -16,7 +16,12 @@ st.markdown(
     [data-testid="stSidebar"] {display:none !important;}
     [data-testid="stSidebarNav"] {display:none !important;}
 
-    /* Make page spacing nicer + move content down a bit */
+    /* Attractive grey background */
+    .stApp {
+        background: linear-gradient(180deg, #f3f4f6 0%, #eef2f7 60%, #f8fafc 100%) !important;
+    }
+
+    /* Page spacing */
     .block-container {
         padding-top: 1.8rem;
         padding-bottom: 1.0rem;
@@ -26,19 +31,27 @@ st.markdown(
     /* Remove any horizontal rule lines */
     hr {display:none !important;}
 
+    /* ---- REMOVE THAT BLANK BOX ----
+       Sometimes a stray text_input/search component appears.
+       Hide empty text inputs and their containers.
+    */
+    [data-testid="stTextInput"] {display:none !important;}
+    [data-testid="stTextInputRootElement"] {display:none !important;}
+    input[type="text"] {display:none !important;}
+
     /* Header wrapper */
     .nea-header {
         margin-top: 8px;
         margin-bottom: 18px;
     }
 
-    /* Card container */
+    /* Card container (white, on grey background) */
     .nea-card{
-        border: 1px solid rgba(0,0,0,0.08);
+        border: 1px solid rgba(0,0,0,0.10);
         border-radius: 18px;
         padding: 18px 18px 22px 18px;
         background: #ffffff;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+        box-shadow: 0 12px 34px rgba(0,0,0,0.08);
     }
 
     /* Tiles grid */
@@ -70,7 +83,7 @@ st.markdown(
         user-select: none;
     }
 
-    /* Also force white for visited/hover/active states (links sometimes become dark) */
+    /* Force white for visited/hover/active */
     .tile:visited { color:#ffffff !important; }
     .tile:hover   { color:#ffffff !important; text-decoration:none !important; }
     .tile:active  { color:#ffffff !important; }
@@ -114,31 +127,19 @@ elif go == "working":
     st.query_params.clear()
     st.switch_page("pages/5_Working.py")
 
-# -------------------- LOGO (NO CROP GUARANTEE) --------------------
-# Your repo has logo.jpg in root
+# -------------------- LOGO (NO CROP) --------------------
 logo_path = Path(__file__).parent / "logo.jpg"
 
 def load_logo_no_crop(path: Path, target_px: int = 170) -> Image.Image | None:
-    """
-    Ensures the logo is ALWAYS fully visible:
-    - adds padding around it
-    - uses contain() (never crops)
-    - returns an RGBA image safe for st.image
-    """
     if not path.exists():
         return None
 
     img = Image.open(path).convert("RGBA")
-
-    # Add generous padding so edges never appear clipped
     img = ImageOps.expand(img, border=18, fill=(255, 255, 255, 255))
-
-    # Resize to fit inside a square WITHOUT cropping
     img = ImageOps.contain(img, (target_px, target_px))
-
     return img
 
-# -------------------- HEADER (moved down) --------------------
+# -------------------- HEADER --------------------
 st.markdown("<div class='nea-header'>", unsafe_allow_html=True)
 
 c1, c2 = st.columns([1.2, 5.0], vertical_alignment="center")
@@ -146,7 +147,6 @@ c1, c2 = st.columns([1.2, 5.0], vertical_alignment="center")
 with c1:
     logo = load_logo_no_crop(logo_path, target_px=170)
     if logo is not None:
-        # Fixed width prevents Streamlit responsive scaling that can clip in some layouts
         st.image(logo, width=170)
     else:
         st.error("logo.jpg not found in repo root.")
