@@ -10,28 +10,33 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# -------------------- CSS: hide sidebar, menu/footer; keep layout clean --------------------
+# -------------------- CSS (grey background + clean UI) --------------------
 st.markdown(
     """
     <style>
-    /* Sidebar off */
+    /* Grey background (force) */
+    html, body, [data-testid="stApp"] {
+        background: #eef2f7 !important;
+    }
+
+    /* Hide sidebar completely */
     [data-testid="stSidebar"] {display:none !important;}
     [data-testid="collapsedControl"] {display:none !important;}
 
-    /* Remove Streamlit toolbars/menu/footer (config.toml removes topbar red circle best) */
+    /* Hide toolbar/menu/footer inside app (top bar is removed reliably via config.toml) */
     [data-testid="stToolbar"] {display:none !important;}
     #MainMenu {visibility:hidden;}
     footer {visibility:hidden;}
 
-    /* Layout spacing (prevents logo cut) */
+    /* Layout spacing */
     .block-container{
-        padding-top: 3.0rem !important;
-        padding-bottom: 2.4rem !important;
+        padding-top: 2.8rem !important;
+        padding-bottom: 2.2rem !important;
         max-width: 1150px;
     }
 
-    /* Center wrapper */
-    .nea-center{
+    /* Perfect center wrapper */
+    .nea-wrap{
         display:flex;
         flex-direction:column;
         align-items:center;
@@ -54,10 +59,13 @@ st.markdown(
     .nea-title{
         font-size: 46px;
         font-weight: 900;
-        margin: 6px 0 8px 0;
+        margin: 6px 0 6px 0;
         color: #111827;
         letter-spacing: 0.2px;
     }
+
+    /* Divider spacing */
+    hr {margin: 18px 0 22px 0 !important;}
 
     /* Tabs container */
     .tabs-grid{
@@ -65,18 +73,18 @@ st.markdown(
         flex-direction:column;
         gap:18px;
         align-items:center;
-        margin-top: 16px;
-        margin-bottom: 30px;
+        margin-top: 14px;
+        margin-bottom: 24px;
     }
 
-    /* Tab buttons */
+    /* Tab button base style */
     div.stButton > button{
-        width: 610px !important;
-        height: 62px !important;
-        border-radius: 16px !important;
+        width: 620px !important;
+        height: 64px !important;
+        border-radius: 18px !important;
         font-size: 16px !important;
         font-weight: 900 !important;
-        border: 1px solid rgba(255,255,255,0.20) !important;
+        border: 1px solid rgba(255,255,255,0.22) !important;
         box-shadow: 0 14px 28px rgba(0,0,0,0.10) !important;
         transition: transform 0.08s ease, filter 0.14s ease, box-shadow 0.14s ease;
         text-align: left !important;
@@ -108,8 +116,8 @@ def go(page_path: str):
     except Exception:
         st.info("Navigation not available in this Streamlit version. Upgrade Streamlit or use multipage menu.")
 
-# -------------------- Header: logo centered ABOVE title --------------------
-st.markdown('<div class="nea-center">', unsafe_allow_html=True)
+# -------------------- Header: logo centered above title --------------------
+st.markdown('<div class="nea-wrap">', unsafe_allow_html=True)
 
 logo_path = os.path.join(BASE_DIR, "logo.jpg")
 if os.path.exists(logo_path):
@@ -118,18 +126,18 @@ if os.path.exists(logo_path):
     st.image(img, width=125)
     st.markdown("</div>", unsafe_allow_html=True)
 
-# Subtitle removed (as requested)
+# Subtitle removed (as you asked)
 st.markdown('<div class="nea-title">NEA Protection &amp; Coordination Tools</div>', unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.divider()
 
-# -------------------- 4 blue-shade tabs with icons --------------------
+# -------------------- 4 attractive blue shade tabs with icons --------------------
 pad_l, center, pad_r = st.columns([1, 2, 1])
 with center:
     st.markdown('<div class="tabs-grid">', unsafe_allow_html=True)
 
-    # 1
+    # Tab 1
     st.markdown("""
     <style>
     div.stButton:nth-of-type(1) > button{
@@ -140,7 +148,7 @@ with center:
     if st.button("📈  Protection Coordination Tool (TCC Plot)"):
         go("pages/1_TCC_Tool.py")
 
-    # 2
+    # Tab 2
     st.markdown("""
     <style>
     div.stButton:nth-of-type(2) > button{
@@ -151,7 +159,7 @@ with center:
     if st.button("⚡  OC / EF Grid Coordination Tool"):
         go("pages/2_OC_EF_Grid.py")
 
-    # 3
+    # Tab 3
     st.markdown("""
     <style>
     div.stButton:nth-of-type(3) > button{
@@ -162,7 +170,7 @@ with center:
     if st.button("📘  Protection Theory Guide"):
         go("pages/3_Theory.py")
 
-    # 4
+    # Tab 4
     st.markdown("""
     <style>
     div.stButton:nth-of-type(4) > button{
