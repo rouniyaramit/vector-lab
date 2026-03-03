@@ -1,6 +1,6 @@
-streamlit>=1.31.0
+streamlit>=1.31
 numpy
 matplotlib
-pandas
 pillow
-fpdf2
+reportlab
+pandas
